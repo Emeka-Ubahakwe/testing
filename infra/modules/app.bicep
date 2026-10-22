@@ -44,7 +44,7 @@ resource app 'Microsoft.App/containerApps@2024-03-01' = {
           env: [
             { name: 'METRICS_RESOURCE_ID', value: appResourceId }
             { name: 'METRICS_REGION', value: location }
-            { name: 'EMIT_LOOP', value: string(emitLoop) }
+            { name: 'EMIT_LOOP', value: emitLoop ? 'true' : 'false' }
             // Tells the token request which identity to use.
             { name: 'AZURE_CLIENT_ID', value: identity.properties.clientId }
           ]
