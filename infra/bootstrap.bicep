@@ -9,7 +9,7 @@
 param location string = 'uksouth'
 
 @description('GitHub repo allowed to log in, as owner/name.')
-param githubRepo string = 'Emeka-Ubahakwe/testing@1429471440'
+param githubRepo string = 'Emeka-Ubahakwe@336719944/testing@1429471440'
 
 var tags = { sandbox: 'bootstrap' }
 var githubIssuer = 'https://token.actions.githubusercontent.com'
