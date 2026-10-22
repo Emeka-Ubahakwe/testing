@@ -1,0 +1,43 @@
+# Manual button: deletes everything tagged sandbox=obs in the resource group.
+# The two bootstrap identities are tagged sandbox=bootstrap, so they stay.
+
+name: teardown
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: Type DELETE to remove everything the sandbox deployed
+        required: true
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  RESOURCE_GROUP: Emeka-Sandbox
+
+jobs:
+  teardown:
+    if: inputs.confirm == 'DELETE'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: delete sandbox resources
+        run: |
+          ids() {
+            az resource list --resource-group "$RESOURCE_GROUP" \
+              --query "[?tags.sandbox=='obs' $1].id" --output tsv
+          }
+          # Apps first, then the environment they run in, then everything else.
+          for id in $(ids "&& type=='Microsoft.App/containerApps'"); do az resource delete --ids "$id"; done
+          for id in $(ids "&& type=='Microsoft.App/managedEnvironments'"); do az resource delete --ids "$id"; done
+          for id in $(ids ""); do az resource delete --ids "$id"; done
+
+      - name: show what is left
+        run: az resource list --resource-group "$RESOURCE_GROUP" --query "[].{name:name, type:type, sandbox:tags.sandbox}" --output table
