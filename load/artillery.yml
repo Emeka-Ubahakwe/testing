@@ -1,0 +1,33 @@
+# Short load tests to trigger the platform alerts.
+# Pick one with -e, for example:  npx artillery@latest run -e errors load/artillery.yml
+# Each run takes 12 minutes: 6 gentle (one request a minute), then 6 heavy (one a second).
+
+config:
+  target: "https://ca-obs-sbx.whitewave-679938f0.uksouth.azurecontainerapps.io"
+  phases:
+    - name: gentle
+      duration: 360
+      arrivalCount: 6
+    - name: heavy
+      duration: 360
+      arrivalRate: 1
+  http:
+    timeout: 30
+  environments:
+    errors:
+      variables:
+        path: ["/fail?code=500"]
+    slow:
+      variables:
+        path: ["/slow?ms=2000"]
+    very-slow:
+      variables:
+        path: ["/slow?ms=5000"]
+    cpu:
+      variables:
+        path: ["/cpu?seconds=1"]
+
+scenarios:
+  - flow:
+      - get:
+          url: "{{ path }}"
