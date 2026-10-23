@@ -16,6 +16,10 @@ param emitLoop bool = true
 @description('Log analytics daily cap in GB, as text because bicep has no decimals. Collection stops for the day once it is hit.')
 param dailyCapGb string = '0.1'
 
+@description('Email for alert notifications. Comes from the ALERT_EMAIL secret.')
+param alertEmail string
+
+
 var tags = { sandbox: 'obs' }
 
 module logs 'modules/logs.bicep' = {
@@ -50,6 +54,24 @@ module app 'modules/app.bicep' = {
     emitLoop: emitLoop
   }
 }
+
+module actionGroups 'modules/action-groups.bicep' = {
+  name: 'action-groups'
+  params: {
+    tags: tags
+    alertEmail: alertEmail
+  }
+}
+
+module platformAlerts 'modules/platform-alerts.bicep' = {
+  name: 'platform-alerts'
+  params: {
+    tags: tags
+    appId: app.outputs.id
+    actionGroupId: actionGroups.outputs.cloudId
+  }
+}
+
 
 output appUrl string = 'https://${app.outputs.fqdn}'
 output appResourceId string = app.outputs.id

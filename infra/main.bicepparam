@@ -6,3 +6,4 @@ param image = readEnvironmentVariable('IMAGE', 'ghcr.io/emeka-ubahakwe/obs-sandb
 
 param emitLoop = true
 param dailyCapGb = '0.1'
+param alertEmail = readEnvironmentVariable('ALERT_EMAIL')
